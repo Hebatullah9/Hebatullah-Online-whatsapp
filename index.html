@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Solo Clinic Chat</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #e5ddd5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .phone {
+      width: 390px;
+      height: 650px;
+      background: #fff;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 0 20px #999;
+    }
+
+    .header {
+      background: #075e54;
+      color: white;
+      padding: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    .chat {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+      background: #efeae2;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 10px;
+      margin: 8px 0;
+      border-radius: 10px;
+      line-height: 1.5;
+      clear: both;
+    }
+
+    .user {
+      background: #dcf8c6;
+      float: left;
+    }
+
+    .bot {
+      background: white;
+      float: right;
+    }
+
+    .input-area {
+      display: flex;
+      padding: 10px;
+      background: #f0f0f0;
+      gap: 8px;
+    }
+
+    input {
+      flex: 1;
+      padding: 12px;
+      border-radius: 20px;
+      border: none;
+      outline: none;
+      font-size: 15px;
+    }
+
+    button {
+      background: #25d366;
+      border: none;
+      color: white;
+      padding: 0 18px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="phone">
+    <div class="header">Solo Clinic 🌸</div>
+
+    <div class="chat" id="chat">
+      <div class="message bot">
+        أهلاً وسهلاً بكِ في Solo Clinic 🌸 كيف أقدر أساعدك؟
+      </div>
+    </div>
+
+    <div class="input-area">
+      <input id="messageInput" type="text" placeholder="اكتبي رسالتك..." />
+      <button onclick="sendMessage()">إرسال</button>
+    </div>
+  </div>
+
+  <script>
+    const WEBHOOK_URL = "PUT_YOUR_N8N_WEBHOOK_URL_HERE";
+
+    async function sendMessage() {
+      const input = document.getElementById("messageInput");
+      const chat = document.getElementById("chat");
+      const message = input.value.trim();
+
+      if (!message) return;
+
+      chat.innerHTML += `<div class="message user">${message}</div>`;
+      input.value = "";
+
+      try {
+        const response = await fetch(WEBHOOK_URL, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            message: message
+          })
+        });
+
+        const data = await response.json();
+
+        chat.innerHTML += `<div class="message bot">${data.reply || "تم استلام رسالتك 🌸"}</div>`;
+        chat.scrollTop = chat.scrollHeight;
+
+      } catch (error) {
+        chat.innerHTML += `<div class="message bot">حدث خطأ في الاتصال مع العيادة.</div>`;
+      }
+    }
+
+    document.getElementById("messageInput").addEventListener("keydown", function(e) {
+      if (e.key === "Enter") sendMessage();
+    });
+  </script>
+
+</body>
+</html>
